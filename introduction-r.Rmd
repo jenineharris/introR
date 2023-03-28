@@ -1,0 +1,374 @@
+---
+title: "R you ready?"
+subtitle: "An Introduction to R"
+output: html_document
+---
+
+## How to follow along and participate
+
+* Open R Studio
+
+* Install the `tidyverse`, `table1`, and `haven` packages (if you haven't already)
+
+    + Use the `Tools` menu and choose the `Install packages...` menu choice 
+
+    + Type the names of the packages, `tidyverse, table1, haven`, in the dialog box that opens and click Install
+
+* Open the workshop R Markdown file and click on the **tiny** triangle on the top right corner of the gray shaded area (this is a code chunk!) that contains this: 
+
+```{r load-packages}
+library(package = "tidyverse")
+library(package = "table1")
+library(package = "haven")
+```
+
+* The arrow will run all the code in that "chunk" of code
+
+* Throughout the workshop you will be able to run the code from the demonstration by clicking the arrow on the top right in the corresponding code chunk
+
+* In between code chunks, you can type as you would in a Word document if you'd like to take notes
+
+
+## The data set
+
+* Data from Pew Internet & American Life
+
+* Teens and tech survey from 2018 
+
+* Available for direct download from https://www.pewresearch.org/internet/dataset/teens-and-tech-survey-2018/
+
+* Includes questions about technology availability, use, and experiences for teenagers including negative experiences
+
+* Today we will use these data to examine the experiences of high school students on social media including differences by race and sex
+
+
+## Importing data into R
+
+
+```{r import-data}
+# use read_spss function to read the spss file 
+teensTechData2018 <- read_spss(file = "March 7-April 10, 2018 - Teens and Tech Survey - SPSS.sav")
+```
+
+
+
+
+## Choosing variables
+
+```{r choose_vars}
+teensTechData2018Rec <- teensTechData2018 %>% 
+  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER)
+```
+
+
+
+## Check your work
+
+```{r check-data-import}
+summary(object = teensTechData2018Rec)
+```
+
+
+
+## Choosing variables & people
+
+```{r choose_vars_obs}
+teensTechData2018Rec <- teensTechData2018 %>% 
+  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
+  filter(AGE > 14)
+```
+
+
+
+## Check your work
+
+```{r check-choose-vars-obs}
+summary(object = teensTechData2018Rec)
+```
+
+
+---
+
+## Managing data types in R
+
+* Commonly used data types in R:
+
+    + factor: variable with categories (categorical data) 
+    
+    + numeric: variable with values over some continuum (continuous data) 
+    
+    + integer: whole number with values over some continuum 
+    
+    + character: used for words or other verbatim information (e.g., ZIP codes) 
+    
+* Several of the variables are the wrong data type! Which ones?
+    
+* The `mutate()` function is useful for changing variable types or values or really anything 
+
+* We can add this function into our data management chain
+
+## Recoding variables
+
+```{r recode}
+teensTechData2018Rec <- teensTechData2018 %>% 
+  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
+  filter(AGE > 14) %>% 
+  zap_labels() %>% 
+  mutate(AGE = as.numeric(AGE)) %>% 
+  mutate(GENDER = recode_factor(GENDER,
+                                '1' = 'Male',
+                                '2' = 'Female',
+                                '99' = NA_character_))
+```
+
+
+
+## Check your work
+
+```{r check-recode}
+summary(object = teensTechData2018Rec)
+```
+
+
+
+## Recoding more variables
+
+```{r recode_more}
+teensTechData2018Rec <- teensTechData2018 %>% 
+  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
+  filter(AGE > 14) %>% 
+  zap_labels() %>% 
+  mutate(AGE = as.numeric(AGE)) %>% 
+  mutate(GENDER = recode_factor(GENDER,
+                                '1' = 'Male',
+                                '2' = 'Female',
+                                '99' = NA_character_)) %>% 
+  mutate(RACETHNICITY = recode_factor(RACETHNICITY,
+                                      '1' = 'White, non-Hispanic',
+                                      '2' = 'Black, non-Hispanic',
+                                      '3' = 'Other, non-Hispanic',
+                                      '4' = 'Hispanic',
+                                      '98' = NA_character_)) 
+```
+
+
+
+## Check your work
+
+```{r check-recode-more}
+summary(object = teensTechData2018Rec)
+```
+
+
+## Recoding tech variables
+
+```{r recode_tech}
+teensTechData2018Rec <- teensTechData2018 %>% 
+  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
+  filter(AGE > 14) %>% 
+  zap_labels() %>% 
+  mutate(AGE = as.numeric(AGE)) %>% 
+  mutate(GENDER = recode_factor(GENDER,
+                                '1' = 'Male',
+                                '2' = 'Female',
+                                '99' = NA_character_)) %>% 
+  mutate(RACETHNICITY = recode_factor(RACETHNICITY,
+                                      '1' = 'White, non-Hispanic',
+                                      '2' = 'Black, non-Hispanic',
+                                      '3' = 'Other, non-Hispanic',
+                                      '4' = 'Hispanic',
+                                      '98' = NA_character_)) %>% 
+  mutate(SNS2 = recode_factor(SNS2,
+                              '1' = 'Twitter',
+                              '2' = 'Instagram',
+                              '3' = 'Facebook',
+                              '4' = 'Snapchat',
+                              '5' = 'YouTube',
+                              '6' = 'Tumblr',
+                              '7' = 'Reddit',
+                              '8' = 'Not a social media user',
+                              '98' = NA_character_)) %>% 
+  mutate(OH3_1 = recode_factor(OH3_1,
+                               '0' = 'No',
+                               '1' = 'Yes'))
+  
+```
+
+
+
+## Check your work
+
+```{r check-recode-tech}
+summary(object = teensTechData2018Rec)
+```
+
+
+## You Try It!
+
+* Finish the recoding yourself by adding the code for cleaning SOC1, OH3_2, OH3_7 to the data management code in the chunk below
+
+* The codebook is unclear, so here are the labels to add:
+
+    + SOC1: 1 = Mostly positive, 2 = Mostly negative, and 3 = Neither positive nor negative 
+    
+    + OH3_2 and OH3_7: 1 = Yes, 0 = No
+    
+* When finished adding this code, run the `summary()` function to see if it works
+
+
+```{r complete-data-management}
+teensTechData2018Rec <- teensTechData2018 %>% 
+  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
+  filter(AGE > 14) %>% 
+  zap_labels() %>% 
+  mutate(AGE = as.numeric(AGE)) %>% 
+  mutate(GENDER = recode_factor(GENDER,
+                                '1' = 'Male',
+                                '2' = 'Female',
+                                '99' = NA_character_)) %>% 
+  mutate(RACETHNICITY = recode_factor(RACETHNICITY,
+                                      '1' = 'White, non-Hispanic',
+                                      '2' = 'Black, non-Hispanic',
+                                      '3' = 'Other, non-Hispanic',
+                                      '4' = 'Hispanic',
+                                      '98' = NA_character_)) %>% 
+  mutate(SNS2 = recode_factor(SNS2,
+                              '1' = 'Twitter',
+                              '2' = 'Instagram',
+                              '3' = 'Facebook',
+                              '4' = 'Snapchat',
+                              '5' = 'YouTube',
+                              '6' = 'Tumblr',
+                              '7' = 'Reddit',
+                              '8' = 'Not a social media user',
+                              '98' = NA_character_)) %>% 
+  mutate(OH3_1 = recode_factor(OH3_1,
+                               '0' = 'No',
+                               '1' = 'Yes'))
+  
+```
+
+
+## Descriptive stats & tables 
+
+* There are dozens of ways to get descriptive statistics in R 
+
+* One of the most efficient is to use a table function 
+
+* As long as your data are clean, R does the work of choosing appropriate statistics for you 
+
+* Let's make a table!
+
+
+## Basic table
+
+```{r basic_table}
+table1(~ SOC1 + AGE + GENDER + RACETHNICITY, 
+       data = teensTechData2018Rec)
+```
+
+
+## Adding labels & units to the table
+
+```{r add-labels-units}
+label(teensTechData2018Rec$SOC1) <- "What effect would you say social media has had on people your age?"
+label(teensTechData2018Rec$RACETHNICITY) <- "Race & ethnicity"
+label(teensTechData2018Rec$GENDER) <- "Sex"
+label(teensTechData2018Rec$AGE) <- "Age"
+
+units(teensTechData2018Rec$AGE) <- "years"
+```
+
+
+## Fancier table
+
+```{r fancy_table}
+table1(~ SOC1 + AGE + GENDER + RACETHNICITY, 
+       data = teensTechData2018Rec,
+       render.missing = NULL,
+       render.continuous = c(. = "Mean (SD)"))
+```
+
+
+## Making graphs with ggplot
+
+* Part of the `tidyverse` set of packages in R
+
+* `gg` stands for **grammar** of **graphics**
+
+* Plots created in `ggplot2` are built in layers 
+
+* First, a bar chart...
+
+
+## Basic bar chart
+
+```{r my_bar}
+teensTechData2018Rec %>%
+  ggplot(aes(x = SNS2)) +
+  geom_bar() 
+```
+
+## Fancy bar chart
+
+```{r my_bar_fancy}
+teensTechData2018Rec %>%
+  drop_na(SNS2) %>% 
+  ggplot(aes(x = SNS2)) +
+  geom_bar(fill = "#7463AC") +
+  labs(x = "Social media platform",
+       y = "Number who use this platform most",
+       title = "Most used social media platforms") +
+  theme_minimal()
+```
+
+
+## You try it!
+
+Make a bar chart of one of the other variables in your data set with the Figure 1 code in your R Markdown file.
+
+Edit the code to: 
+
+* Change the name of the variable you are plotting 
+
+* Change the color of the bars by replacing #7463AC the name of your favorite color (e.g., orange) or using a color found on the https://colorbrewer2.org/ website
+
+* Edit the labels for the axes and title inside the quote marks
+
+* Try another theme, you can find them here: https://ggplot2.tidyverse.org/reference/ggtheme.html
+
+When you have completed the changes, click the little green arrow on the top right of the code chunk to run the code.
+
+## Figure 1 code
+
+```{r my_bar_fancy_fig1}
+teensTechData2018Rec %>%
+  drop_na(OH3_2) %>% 
+  ggplot(aes(x = OH3_2)) +
+  geom_bar(fill = "dodgerblue") +
+  labs(x = "Been physically threatened online or on cell phone",
+       y = "Frequency",
+       title = "Number of participants who have been physically threatened online\nor on cell phone") +
+  theme_minimal()
+```
+
+## Graph with facets
+
+```{r facet_graph}
+teensTechData2018Rec %>%
+  drop_na(OH3_2, GENDER) %>% 
+  ggplot(aes(x = OH3_2)) +
+  geom_bar(fill = "dodgerblue") +
+  labs(x = "Been physically threatened online or on cell phone",
+       y = "Frequency",
+       title = "Number of participants who have been physically threatened online\nor on cell phone") +
+  theme_minimal() +
+  facet_wrap(facets = vars(GENDER))
+```
+
+
+## The end
+
+* Email me at harrisj@wustl.edu
+
+* Connect with me on Twitter @jenineharris
