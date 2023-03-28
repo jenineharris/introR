@@ -46,7 +46,7 @@ Download the participant files and save them together in the same folder on your
 <ul>
 <li> Click on the green Code button toward the top of this GitHub page
 <li> Choose Download ZIP
-<li> Unzip the downloaded zip file and save all the files in a single folder on your computer
+<li> Unzip the downloaded zip file and save all the files into a single folder on your computer
 </ul>
 
 ### R Resources
