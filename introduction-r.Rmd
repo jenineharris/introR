@@ -8,7 +8,7 @@ output: html_document
 
 * Open R Studio
 
-* Install the `tidyverse`, `table1`, and `haven` packages (if you haven't already)
+* Install the `tidyverse`, `table1`, `janitor`, and `haven` packages (if you haven't already)
 
     + Use the `Tools` menu and choose the `Install packages...` menu choice 
 
@@ -20,6 +20,7 @@ output: html_document
 library(package = "tidyverse")
 library(package = "table1")
 library(package = "haven")
+library(package = "janitor")
 ```
 
 * The arrow will run all the code in that "chunk" of code
@@ -56,10 +57,10 @@ teensTechData2018 <- read_spss(file = "March 7-April 10, 2018 - Teens and Tech S
 ## Choosing variables
 
 ```{r choose_vars}
-teensTechData2018Rec <- teensTechData2018 %>% 
-  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER)
+teensTechData2018Rec <- teensTechData2018 |> 
+  clean_names() |> 
+  select(sns2, soc1, oh3_1, oh3_2, oh3_7, age, racethnicity, gender)
 ```
-
 
 
 ## Check your work
@@ -73,9 +74,10 @@ summary(object = teensTechData2018Rec)
 ## Choosing variables & people
 
 ```{r choose_vars_obs}
-teensTechData2018Rec <- teensTechData2018 %>% 
-  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
-  filter(AGE > 14)
+teensTechData2018Rec <- teensTechData2018 |> 
+  clean_names() |> 
+  select(sns2, soc1, oh3_1, oh3_2, oh3_7, age, racethnicity, gender) |> 
+  filter(age > 14)
 ```
 
 
@@ -86,8 +88,6 @@ teensTechData2018Rec <- teensTechData2018 %>%
 summary(object = teensTechData2018Rec)
 ```
 
-
----
 
 ## Managing data types in R
 
@@ -110,15 +110,12 @@ summary(object = teensTechData2018Rec)
 ## Recoding variables
 
 ```{r recode}
-teensTechData2018Rec <- teensTechData2018 %>% 
-  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
-  filter(AGE > 14) %>% 
-  zap_labels() %>% 
-  mutate(AGE = as.numeric(AGE)) %>% 
-  mutate(GENDER = recode_factor(GENDER,
-                                '1' = 'Male',
-                                '2' = 'Female',
-                                '99' = NA_character_))
+teensTechData2018Rec <- teensTechData2018 |> 
+  clean_names() |> 
+  select(sns2, soc1, oh3_1, oh3_2, oh3_7, age, racethnicity, gender) |> 
+  filter(age > 14) |> 
+  as_factor() |> 
+  mutate(age = as.numeric(age))
 ```
 
 
@@ -131,70 +128,27 @@ summary(object = teensTechData2018Rec)
 
 
 
-## Recoding more variables
+## Labeling variables manually
 
-```{r recode_more}
-teensTechData2018Rec <- teensTechData2018 %>% 
-  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
-  filter(AGE > 14) %>% 
-  zap_labels() %>% 
-  mutate(AGE = as.numeric(AGE)) %>% 
-  mutate(GENDER = recode_factor(GENDER,
-                                '1' = 'Male',
-                                '2' = 'Female',
-                                '99' = NA_character_)) %>% 
-  mutate(RACETHNICITY = recode_factor(RACETHNICITY,
-                                      '1' = 'White, non-Hispanic',
-                                      '2' = 'Black, non-Hispanic',
-                                      '3' = 'Other, non-Hispanic',
-                                      '4' = 'Hispanic',
-                                      '98' = NA_character_)) 
-```
+* This is necessary in situations where the data do not come with labels or when you want to collapse or rename categories
 
-
-
-## Check your work
-
-```{r check-recode-more}
-summary(object = teensTechData2018Rec)
-```
-
-
-## Recoding tech variables
-
+* Let's recode the "DON'T KNOW" "SKIPPED ON WEB" and "REFUSED" to be missing values for the `soc1` variable
+   + missing values are coded as NA (not available) in R
+   + when recoding something that includes a special character, use back ticks ` instead of quotes
+   
 ```{r recode_tech}
-teensTechData2018Rec <- teensTechData2018 %>% 
-  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
-  filter(AGE > 14) %>% 
-  zap_labels() %>% 
-  mutate(AGE = as.numeric(AGE)) %>% 
-  mutate(GENDER = recode_factor(GENDER,
-                                '1' = 'Male',
-                                '2' = 'Female',
-                                '99' = NA_character_)) %>% 
-  mutate(RACETHNICITY = recode_factor(RACETHNICITY,
-                                      '1' = 'White, non-Hispanic',
-                                      '2' = 'Black, non-Hispanic',
-                                      '3' = 'Other, non-Hispanic',
-                                      '4' = 'Hispanic',
-                                      '98' = NA_character_)) %>% 
-  mutate(SNS2 = recode_factor(SNS2,
-                              '1' = 'Twitter',
-                              '2' = 'Instagram',
-                              '3' = 'Facebook',
-                              '4' = 'Snapchat',
-                              '5' = 'YouTube',
-                              '6' = 'Tumblr',
-                              '7' = 'Reddit',
-                              '8' = 'Not a social media user',
-                              '98' = NA_character_)) %>% 
-  mutate(OH3_1 = recode_factor(OH3_1,
-                               '0' = 'No',
-                               '1' = 'Yes'))
+teensTechData2018Rec <- teensTechData2018 |> 
+  clean_names() |> 
+  select(sns2, soc1, oh3_1, oh3_2, oh3_7, age, racethnicity, gender) |> 
+  filter(age > 14) |> 
+  as_factor() |>
+  mutate(age = as.numeric(age)) |> 
+  mutate(soc1 = recode_factor(soc1,
+                              `DON’T KNOW` = NA_character_, 
+                              "SKIPPED ON WEB" = NA_character_, 
+                              "REFUSED" = NA_character_))
   
 ```
-
-
 
 ## Check your work
 
@@ -202,51 +156,74 @@ teensTechData2018Rec <- teensTechData2018 %>%
 summary(object = teensTechData2018Rec)
 ```
 
+## Recoding into fewer categories
+
+* Let's try collapsing the social media categories into the three largest (at least in 2018), everyone else, and no use
+
+```{r recode_tech_collapse}
+teensTechData2018Rec <- teensTechData2018 |> 
+  clean_names() |> 
+  select(sns2, soc1, oh3_1, oh3_2, oh3_7, age, racethnicity, gender) |> 
+  filter(age > 14) |> 
+  as_factor() |>
+  mutate(age = as.numeric(age)) |> 
+  mutate(sns2 = recode_factor(sns2,
+                              'Twitter' = 'Twitter, Facebook, Instagram',
+                              'Instagram' = 'Twitter, Facebook, Instagram',
+                              'Facebook' = 'Twitter, Facebook, Instagram',
+                              'Snapchat' = "Other social media user",
+                              'YouTube' = "Other social media user",
+                              'Tumblr' = "Other social media user",
+                              'Reddit' = "Other social media user",
+                              'Tumblr OR Reddit' = "Other social media user",
+                              'Not a social media user' = "Not a social media user",
+                              '98' = NA_character_)) 
+  
+```
+
+
+## Check your work
+
+```{r check-recode-tech_collapse}
+summary(object = teensTechData2018Rec)
+```
+
+## Shortcuts to labeling
+
+* Let's do the same thing with less code! 
+
+```{r recode_tech_short}
+teensTechData2018Rec <- teensTechData2018 |> 
+  clean_names() |> 
+  select(sns2, soc1, oh3_1, oh3_2, oh3_7, age, racethnicity, gender) |> 
+  filter(age > 14) |> 
+  as_factor() |>
+  mutate(age = as.numeric(age)) |> 
+  mutate(across(where(is.factor), ~ recode_factor(.,
+                              `DON’T KNOW` = NA_character_, 
+                              "SKIPPED ON WEB" = NA_character_, 
+                              "REFUSED" = NA_character_))) |> 
+  mutate(sns2 = as.factor(case_when(sns2 %in% c("Twitter", "Facebook", "Instagram") ~ 'Twitter, Facebook, Instagram',
+                          sns2 %in% c('Snapchat', 'YouTube', 'Tumblr', 'Reddit', 'Tumblr OR Reddit') ~ "Other social media user",
+                          .default = sns2)))
+  
+```
+
+```{r check-recode-tech_short}
+summary(object = teensTechData2018Rec)
+```
 
 ## You Try It!
 
-* Finish the recoding yourself by adding the code for cleaning SOC1, OH3_2, OH3_7 to the data management code in the chunk below
+* Add a new R code chunk 
 
-* The codebook is unclear, so here are the labels to add:
+* Copy and paste the code from the recode_tech_short code chunk 
 
-    + SOC1: 1 = Mostly positive, 2 = Mostly negative, and 3 = Neither positive nor negative 
-    
-    + OH3_2 and OH3_7: 1 = Yes, 0 = No
-    
-* When finished adding this code, run the `summary()` function to see if it works
+* Try adding the "Refused" category from the gender variable and the "Missing" category from race-ethnicity to the list 
+
+* When finished adding this code, add and run the `summary()` function to see if it works
 
 
-```{r complete-data-management}
-teensTechData2018Rec <- teensTechData2018 %>% 
-  select(SNS2, SOC1, OH3_1, OH3_2, OH3_7, AGE, RACETHNICITY, GENDER) %>% 
-  filter(AGE > 14) %>% 
-  zap_labels() %>% 
-  mutate(AGE = as.numeric(AGE)) %>% 
-  mutate(GENDER = recode_factor(GENDER,
-                                '1' = 'Male',
-                                '2' = 'Female',
-                                '99' = NA_character_)) %>% 
-  mutate(RACETHNICITY = recode_factor(RACETHNICITY,
-                                      '1' = 'White, non-Hispanic',
-                                      '2' = 'Black, non-Hispanic',
-                                      '3' = 'Other, non-Hispanic',
-                                      '4' = 'Hispanic',
-                                      '98' = NA_character_)) %>% 
-  mutate(SNS2 = recode_factor(SNS2,
-                              '1' = 'Twitter',
-                              '2' = 'Instagram',
-                              '3' = 'Facebook',
-                              '4' = 'Snapchat',
-                              '5' = 'YouTube',
-                              '6' = 'Tumblr',
-                              '7' = 'Reddit',
-                              '8' = 'Not a social media user',
-                              '98' = NA_character_)) %>% 
-  mutate(OH3_1 = recode_factor(OH3_1,
-                               '0' = 'No',
-                               '1' = 'Yes'))
-  
-```
 
 
 ## Descriptive stats & tables 
@@ -263,7 +240,7 @@ teensTechData2018Rec <- teensTechData2018 %>%
 ## Basic table
 
 ```{r basic_table}
-table1(~ SOC1 + AGE + GENDER + RACETHNICITY, 
+table1(~ soc1 + age + gender + racethnicity, 
        data = teensTechData2018Rec)
 ```
 
@@ -271,19 +248,19 @@ table1(~ SOC1 + AGE + GENDER + RACETHNICITY,
 ## Adding labels & units to the table
 
 ```{r add-labels-units}
-label(teensTechData2018Rec$SOC1) <- "What effect would you say social media has had on people your age?"
-label(teensTechData2018Rec$RACETHNICITY) <- "Race & ethnicity"
-label(teensTechData2018Rec$GENDER) <- "Sex"
-label(teensTechData2018Rec$AGE) <- "Age"
+label(teensTechData2018Rec$soc1) <- "What effect would you say social media has had on people your age?"
+label(teensTechData2018Rec$racethnicity) <- "Race & ethnicity"
+label(teensTechData2018Rec$gender) <- "Sex"
+label(teensTechData2018Rec$age) <- "Age"
 
-units(teensTechData2018Rec$AGE) <- "years"
+units(teensTechData2018Rec$age) <- "years"
 ```
 
 
 ## Fancier table
 
 ```{r fancy_table}
-table1(~ SOC1 + AGE + GENDER + RACETHNICITY, 
+table1(~ soc1 + age + gender + racethnicity, 
        data = teensTechData2018Rec,
        render.missing = NULL,
        render.continuous = c(. = "Mean (SD)"))
@@ -304,17 +281,17 @@ table1(~ SOC1 + AGE + GENDER + RACETHNICITY,
 ## Basic bar chart
 
 ```{r my_bar}
-teensTechData2018Rec %>%
-  ggplot(aes(x = SNS2)) +
+teensTechData2018Rec |>
+  ggplot(aes(x = sns2)) +
   geom_bar() 
 ```
 
 ## Fancy bar chart
 
 ```{r my_bar_fancy}
-teensTechData2018Rec %>%
-  drop_na(SNS2) %>% 
-  ggplot(aes(x = SNS2)) +
+teensTechData2018Rec |>
+  drop_na(sns2) |> 
+  ggplot(aes(x = sns2)) +
   geom_bar(fill = "#7463AC") +
   labs(x = "Social media platform",
        y = "Number who use this platform most",
@@ -331,7 +308,7 @@ Edit the code to:
 
 * Change the name of the variable you are plotting 
 
-* Change the color of the bars by replacing #7463AC the name of your favorite color (e.g., orange) or using a color found on the https://colorbrewer2.org/ website
+* Change the color of the bars by replacing #7463AC the name of your favorite color (e.g., orange) or using a color found on the https://colorbrewer2.org/ or another website
 
 * Edit the labels for the axes and title inside the quote marks
 
@@ -342,9 +319,9 @@ When you have completed the changes, click the little green arrow on the top rig
 ## Figure 1 code
 
 ```{r my_bar_fancy_fig1}
-teensTechData2018Rec %>%
-  drop_na(OH3_2) %>% 
-  ggplot(aes(x = OH3_2)) +
+teensTechData2018Rec |>
+  drop_na(oh3_2) |> 
+  ggplot(aes(x = oh3_2)) +
   geom_bar(fill = "dodgerblue") +
   labs(x = "Been physically threatened online or on cell phone",
        y = "Frequency",
@@ -355,20 +332,18 @@ teensTechData2018Rec %>%
 ## Graph with facets
 
 ```{r facet_graph}
-teensTechData2018Rec %>%
-  drop_na(OH3_2, GENDER) %>% 
-  ggplot(aes(x = OH3_2)) +
+teensTechData2018Rec |>
+  drop_na(oh3_2, gender) |> 
+  ggplot(aes(x = oh3_2)) +
   geom_bar(fill = "dodgerblue") +
   labs(x = "Been physically threatened online or on cell phone",
        y = "Frequency",
        title = "Number of participants who have been physically threatened online\nor on cell phone") +
   theme_minimal() +
-  facet_wrap(facets = vars(GENDER))
+  facet_wrap(facets = vars(gender))
 ```
 
 
 ## The end
 
 * Email me at harrisj@wustl.edu
-
-* Connect with me on Twitter @jenineharris
