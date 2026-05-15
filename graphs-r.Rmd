@@ -10,6 +10,7 @@ output: html_output
 ```{r chunk1}
 library(package = "tidyverse")
 library(package = "gghalves")
+library(package = "iestylr")
 ```
 
 ## Examine the full data set
@@ -24,15 +25,15 @@ starwars
 # change data types & subset data set to remove lists
 # recode hermaphroditic to intersex modern terminology
 # recode species to fewer categories
-starwarsRec <- starwars %>% 
-  select(-films, -vehicles, -starships) %>% 
+starwarsRec <- starwars |> 
+  select(-films, -vehicles, -starships) |> 
   mutate(sex = recode_factor(sex,
-                             'hermaphroditic' = 'intersex')) %>% 
-  mutate(species = if_else(species %in% c('Human', 'Droid'), species, 'Other')) %>% 
+                             'hermaphroditic' = 'intersex')) |> 
+  mutate(species = if_else(species %in% c('Human', 'Droid'), species, 'Other')) |> 
   mutate(eye_color = if_else(eye_color %in% c('brown', 'black', 'dark'), 'dark', 
                              if_else(eye_color %in% c('blue', 'hazel', 'blue-gray', 'red,blue'), 'light',
                                                       if_else(eye_color == 'unknown', NA_character_,
-                                                              'bright')))) %>% 
+                                                              'bright')))) |> 
   mutate_if(is.character, as.factor)
   
 ```
@@ -49,7 +50,7 @@ summary(object = starwarsRec)
 ## Basic bar chart
 
 ```{r chunk5}
-starwarsRec %>%
+starwarsRec |>
   ggplot(aes(x = gender)) +
   geom_bar() 
 ```
@@ -57,8 +58,8 @@ starwarsRec %>%
 ## Fancy bar chart
 
 ```{r chunk6}
-starwarsRec %>%
-  drop_na(gender) %>% 
+starwarsRec |>
+  drop_na(gender) |> 
   ggplot(aes(x = gender)) +
   geom_bar(fill = "#7463AC") +
   labs(x = "Character Gender",
@@ -86,8 +87,8 @@ When you have completed the changes, click the little green arrow on the top rig
 
 ```{r chunk6}
 # create Figure 1
-starwarsRec %>%
-  drop_na(gender) %>% 
+starwarsRec |>
+  drop_na(gender) |> 
   ggplot(aes(x = gender)) +
   geom_bar(fill = "#7463AC") +
   labs(x = "Character Gender",
@@ -100,8 +101,8 @@ starwarsRec %>%
 ## Basic stacked bar chart for 2 variables
 
 ```{r chunk7}
-starwarsRec %>%
-  drop_na(species, gender) %>% 
+starwarsRec |>
+  drop_na(species, gender) |> 
   ggplot(aes(x = species, fill = gender)) +
   geom_bar() 
 ```
@@ -109,43 +110,45 @@ starwarsRec %>%
 ## Fancy stacked bar chart for 2 variables
 
 ```{r chunk8}
-starwarsRec %>%
-  drop_na(species, gender) %>% 
+starwarsRec |>
+  drop_na(species, gender) |> 
   ggplot(aes(x = species, fill = gender)) +
   geom_bar() +
-  scale_fill_brewer(palette = 'Set1', name = "Character Gender") +
+  scale_fill_ie(palette = 'palette_categorical') +
   labs(x = "Character Species",
        y = "Frequency",
-       title = "Species and Gender of Star Wars Characters") +
+       title = "Species and Gender of Star Wars Characters",
+       fill = "Character Gender") +
   theme_minimal(base_size = 14)
 ```
 
 ## Fancy grouped bar chart with color palettes
 
 ```{r chunk9}
-starwarsRec %>%
-  drop_na(species, gender) %>% 
+starwarsRec |>
+  drop_na(species, gender) |> 
   ggplot(aes(x = species, fill = gender)) +
   geom_bar(position = 'dodge') +
-  scale_fill_brewer(palette = 'Set1', name = "Character Gender") +
+  scale_fill_ie(palette = 'palette_categorical') +
   labs(x = "Character Species",
        y = "Frequency",
-       title = "Species and Gender of Star Wars Characters") +
+       title = "Species and Gender of Star Wars Characters",
+       fill = "Character Gender") +
   theme_minimal(base_size = 14)
 ```
 
 ## Fancy grouped bar chart with percentages
 
 ```{r chunk11}
-starwarsRec %>%
-  drop_na(species, gender) %>% 
-  group_by(species, gender) %>% 
-  count() %>% 
-  group_by(species) %>% 
-  mutate(perc = 100 * (n / sum(n))) %>% 
+starwarsRec |>
+  drop_na(species, gender) |> 
+  group_by(species, gender) |> 
+  count() |> 
+  group_by(species) |> 
+  mutate(perc = 100 * (n / sum(n))) |> 
   ggplot(aes(x = species, y = perc, fill = gender)) +
   geom_col(position = 'dodge') +
-  scale_fill_brewer(palette = 'Set1', name = "Character Gender") +
+  scale_fill_ie(palette = 'palette_categorical') +
   labs(x = "Character Species",
        y = "Percentage in Species Group",
        title = "Species and Gender of Star Wars Characters") +
@@ -156,12 +159,12 @@ starwarsRec %>%
 ## Using facets instead of groups
 
 ```{r chunk12}
-starwarsRec %>%
-  drop_na(species, gender) %>% 
-  group_by(species, gender) %>% 
-  count() %>% 
-  group_by(species) %>% 
-  mutate(perc = 100 * (n / sum(n))) %>% 
+starwarsRec |>
+  drop_na(species, gender) |> 
+  group_by(species, gender) |> 
+  count() |> 
+  group_by(species) |> 
+  mutate(perc = 100 * (n / sum(n))) |> 
   ggplot(aes(x = gender, y = perc)) +
   geom_col(position = 'dodge') +
   labs(x = "Character Gender",
@@ -203,8 +206,8 @@ When you have completed the changes, click the little green arrow on the top rig
 ## Basic histogram
 
 ```{r chunk14}
-starwarsRec %>%
-  drop_na(height) %>% 
+starwarsRec |>
+  drop_na(height) |> 
   ggplot(aes(x = height)) +
   geom_histogram()
 ```
@@ -212,8 +215,8 @@ starwarsRec %>%
 ## Fancier histogram
 
 ```{r chunk15}
-starwarsRec %>%
-  drop_na(height) %>% 
+starwarsRec |>
+  drop_na(height) |> 
   ggplot(aes(x = height)) +
   geom_histogram(fill = '#756bb1', color = 'white') +
   labs(x = 'Character height (cm)', 
@@ -225,8 +228,8 @@ starwarsRec %>%
 ## Grouped histogram
 
 ```{r chunk16}
-starwarsRec %>%
-  drop_na(height) %>% 
+starwarsRec |>
+  drop_na(height) |> 
   ggplot(aes(x = height, fill = species)) +
   geom_histogram(color = 'white') +
   labs(x = 'Character height (cm)', 
@@ -239,22 +242,22 @@ starwarsRec %>%
 ## Histogram with facets
 
 ```{r chunk17}
-starwarsRec %>%
-  drop_na(height) %>% 
+starwarsRec |>
+  drop_na(height) |> 
   ggplot(aes(x = height)) +
   geom_histogram(color = 'white', fill = '#c994c7') +
   labs(x = 'Character height (cm)', 
        y = 'Frequency',
        title = 'Distribution of Star Wars Character Height by Species') +
   theme_minimal(base_size = 14) +
-  facet_grid(facets = vars(species))
+  facet_grid(rows = vars(species))
 ```
 
 ## Basic box plot
 
 ```{r chunk18}
-starwarsRec %>%
-  drop_na(height, species) %>% 
+starwarsRec |>
+  drop_na(height, species) |> 
   ggplot(aes(x = species, y = height)) +
   geom_boxplot() 
 ```
@@ -263,8 +266,8 @@ starwarsRec %>%
 ## Fancy layered box plot
 
 ```{r chunk19}
-starwarsRec %>%
-  drop_na(height, species) %>% 
+starwarsRec |>
+  drop_na(height, species) |> 
   ggplot(aes(x = species, y = height)) +
   geom_boxplot(aes(color = species, fill = species), 
                alpha = .4) +
@@ -272,8 +275,8 @@ starwarsRec %>%
   labs(x = "Character Species",
        y = "Height (cm)",
        title = "Height (cm) of Star Wars Characters by Species") +
-  scale_color_brewer(palette = "Set2", guide = FALSE) +
-  scale_fill_brewer(palette = "Set2", guide = FALSE) +
+  scale_color_brewer(palette = "Set2", guide = 'none') +
+  scale_fill_brewer(palette = "Set2", guide = 'none') +
   theme_minimal(base_size = 14)
 ```
 
@@ -281,17 +284,18 @@ starwarsRec %>%
 
 ```{r chunk20}
 
-starwarsRec %>% 
+starwarsRec |> 
   ggplot(aes(y = height, x = species, fill = species, color = species)) +
   geom_half_violin(side = "r") +
-  geom_half_point(alpha = .6, side = "l") +
+  geom_jitter(aes(x = as.numeric(species) - .15, color = species),
+              show.legend = FALSE, size = .8, width = .1) +
   labs(x = "Species",
        y = "Height (cm)",
        title = "Distribution of Species Height for Star Wars\nCharacters") +
   theme_minimal(base_size = 14) +
   coord_flip() +
-  scale_color_brewer(palette = "Dark2") +
-  scale_fill_brewer(palette = "Dark2") +
+  scale_fill_ie(palette = 'palette_categorical') +
+  scale_color_ie(palette = 'palette_categorical') +
   theme(legend.position = 'none')
   
 ```
@@ -299,35 +303,37 @@ starwarsRec %>%
 ## Rain cloud plot
 
 ```{r chunk21}
-starwarsRec %>% 
+starwarsRec |> 
   ggplot(aes(y = mass, x = species, fill = species, color = species)) +
   geom_half_violin(side = "r") +
-  geom_half_point(alpha = .6, side = "l") +
+  geom_jitter(aes(x = as.numeric(species) - .15, color = species),
+              show.legend = FALSE, size = .8, width = .1) +
   labs(x = "Species",
        y = "Mass (kg)",
-       title = "Distribution of Species Height for Star Wars Characters") +
+       title = "Distribution of Species Mass for Star Wars\nCharacters") +
   theme_minimal(base_size = 14) +
   coord_flip() +
-  scale_color_brewer(palette = "Dark2") +
-  scale_fill_brewer(palette = "Dark2") +
+  scale_fill_ie(palette = 'palette_categorical') +
+  scale_color_ie(palette = 'palette_categorical') +
   theme(legend.position = 'none')
 ```
 
 ## Rain cloud plot without Jabba
 
 ```{r chunk22}
-starwarsRec %>% 
-  filter(mass < 250) %>% 
+starwarsRec |> 
+  filter(mass < 250) |> 
   ggplot(aes(y = mass, x = species, fill = species, color = species)) +
   geom_half_violin(side = "r") +
-  geom_half_point(alpha = .6, side = "l") +
+  geom_jitter(aes(x = as.numeric(species) - .15, color = species),
+              show.legend = FALSE, size = .8, width = .1) +
   labs(x = "Species",
        y = "Mass (kg)",
-       title = "Distribution of Species Height for Star Wars Characters\n(Excluding Jabba the Hutt)") +
+       title = "Distribution of Species Mass for Star Wars\nCharacters") +
   theme_minimal(base_size = 14) +
   coord_flip() +
-  scale_color_brewer(palette = "Dark2") +
-  scale_fill_brewer(palette = "Dark2") +
+  scale_fill_ie(palette = 'palette_categorical') +
+  scale_color_ie(palette = 'palette_categorical') +
   theme(legend.position = 'none')
 ```
 
@@ -339,7 +345,7 @@ starwarsRec %>%
 
 * Edit the labels and title as needed
 
-* Change the palettes for color and fill
+* Change the palettes for color and fill to one of the two other IE palettes, see https://github.com/jenineharris/iestylr
 
 * In the parentheses for `theme_minimal()` change the size to larger with `base_size = 16`
 
@@ -353,8 +359,8 @@ starwarsRec %>%
 ## Basic scatter plot
 
 ```{r chunk24}
-starwars %>%
-  drop_na(height, mass) %>% 
+starwars |>
+  drop_na(height, mass) |> 
   ggplot(aes(x = height, y = mass)) +
   geom_point() 
 ```
@@ -362,8 +368,8 @@ starwars %>%
 ## Fancy scatter plot
 
 ```{r chunk25}
-starwars %>%
-  drop_na(height, mass) %>% 
+starwars |>
+  drop_na(height, mass) |> 
   ggplot(aes(x = height, y = mass)) +
   geom_point(color = "dodgerblue2") +
   geom_smooth(method = "lm", se = FALSE, 
@@ -378,9 +384,9 @@ starwars %>%
 
 ```{r chunk26}
 
-starwars %>%
-  drop_na(height, mass) %>% 
-  filter(mass < 250) %>% 
+starwars |>
+  drop_na(height, mass) |> 
+  filter(mass < 250) |> 
   ggplot(aes(x = height, y = mass, label = name)) +
   geom_point(color = "dodgerblue2", shape = 18, 
              size = 4, alpha = .6) + 
@@ -397,6 +403,3 @@ starwars %>%
 ## The end
 
 * Email me at harrisj@wustl.edu
-
-* Connect with me on Twitter @jenineharris
-
